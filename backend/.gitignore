@@ -1,1 +1,8 @@
-/target
+# Rust build / debug files
+target
+
+# Generated Content
+www
+
+# Database
+data.db
