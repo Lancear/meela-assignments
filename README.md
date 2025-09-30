@@ -67,3 +67,89 @@ choices than what has been made in the `/backend` directory)
 
 Remember, focus on the core "resume" functionality - that is what we are evaluating. We look forward to catching up and
 reviewing your submission!
+
+## Thought Process
+
+### Context
+
+A. These forms are intake forms<br>
+B. These forms have multiple sections<br>
+C. These are sensitive mental health questions<br>
+D. The forms can take some time to get through<br>
+E. The form might not be filled in in one sitting due to life
+
+### Assumptions based on the context and linked form
+
+a. Only one version per user necessary as these are intake forms<br>
+b. The vast majority of questions in the form have limited answer options<br>
+-> thus focus on inputs like selects and multiselects<br>
+-> infrequent onChange events compared to typing<br>
+c. Questions are asked one after another<br>
+-> only one data attribute visible at a time
+
+### Data Model
+
+Aside from having multiple choice questions, the information seems to only exist once per form which means a single flat table would be the simple data model. For the multiple choice answers a table or array attribute could be used. But also here the usage and relation to other data dictates what is easier.
+
+#### Decision
+
+I have too little information on how this data will be used and related to other data to split it up sensibly. Thus we will not make the model more complex than necessary at the moment and use a single table. Since this is a prototype and sqlite does not support array types, I will store the multiple choice answers as a csv string. Moving them to a relation table makes accessing the data unnecessarily more cumbersome for a prototype.
+
+### Options to save between sittings
+
+- Save button<br>
+  -> Gives the user control<br>
+  -> Easy to forget
+
+- Autosave based on timer<br>
+  -> Might try/check to save when there are no changes<br>
+  -> Saving is unrelated to user behaviour, so might feel odd<br>
+  -> Consistent rate of saving independent of changes made
+
+- Autosave on tab unfocus / close<br>
+  -> Saves at the last moment where necessary, least amount of saves<br>
+  -> Might try/check to save when there are no changes<br>
+  -> If something goes wrong or takes long there are limited options to inform the user without it feeling awkward. We might interrupt their flow.
+
+- Autosave on input unfocus<br>
+  -> Saves as soon as the user finished adjusting their input<br>
+  -> Might try/check to save when there are no changes<br>
+  -> Changes are available on another device as soon as they are made
+
+- Autosave on input change<br>
+  -> Saves as soon as the user changes something<br>
+  -> Depending on the input, there might be many intermediate saves (e.g. typing)<br>
+  -> Changes are available on another device as soon as they are made
+
+-> For all autosaving options, make sure it is visible to the user. Otherwise the user might think it is not saved at all.
+
+#### Decision
+
+As these are sensitive mental health questions, allow the option to not save at all until the form is completed.
+
+For the given context with mostly inputs that require no typing, autosaving on change should work nicely.
+When adding inputs that require typing I would save those on input unfocus instead.
+
+Aside from the autosave, the next button should also save to give the user the feeling of control / commiting to their answer.
+
+Whenever autosave is running there should be a saving indicator.
+
+Before or on the form we might want to tell the user they can complete the form in as many sittings as they want as intermediate results are saved (automatically and when they click next).
+
+### Event-based updating of data (autosave)
+
+- Full updates<br>
+  -> Can catch missed or failed saves in later saves to make sure the saved data matches the shown data<br>
+  -> Bigger payloads<br>
+  -> Doesn't allow for simultaneous changes from multiple devices to be merged
+
+- Partial updates<br>
+  -> Smaller payloads<br>
+  -> If events are missed or fail, there might be a mismatch in shown and saved data<br>
+  -> Allows for changes from multiple devices to be merged
+
+- Could also be combined, but would increase complexity
+
+#### Decision
+
+I will do partial updates as the payload is smaller and the next buttons make it difficult to miss saves. The final completion of the form will be a full update, as that is the data the user saw and commited to.
