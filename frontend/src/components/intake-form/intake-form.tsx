@@ -1,5 +1,9 @@
 import { createSignal, Match, Show, Switch } from "solid-js";
-import type { IntakeFormData } from "../../api";
+import {
+  createIntakeForm,
+  updateIntakeForm,
+  type IntakeFormData,
+} from "../../api";
 import { ProgressBar } from "../progress-bar";
 import { MultiSelectQuestion } from "./question-types/multi-select-question";
 import { SingleSelectQuestion } from "./question-types/single-select-question";
@@ -19,7 +23,7 @@ interface IntakeFormStep {
 const INTAKE_FORM_STEPS: IntakeFormStep[] = [
   {
     category: "personal situation",
-    field: "reasonsForTherapy",
+    field: "reasons_for_therapy",
     question: "What do you need help with?",
     multiselect: true,
     options: {
@@ -55,7 +59,7 @@ const INTAKE_FORM_STEPS: IntakeFormStep[] = [
   },
   {
     category: "personal situation",
-    field: "goalsInTherapy",
+    field: "goals_in_therapy",
     question: "What do you want to work on or learn in therapy?",
     multiselect: true,
     options: {
@@ -78,7 +82,7 @@ const INTAKE_FORM_STEPS: IntakeFormStep[] = [
   },
   {
     category: "personal situation",
-    field: "ageGroup",
+    field: "age_group",
     question: "How old are you?",
     options: {
       "18-25": "18 - 25",
@@ -91,7 +95,7 @@ const INTAKE_FORM_STEPS: IntakeFormStep[] = [
   },
   {
     category: "therapist preferences",
-    field: "therapistKnowledge",
+    field: "therapist_knowledge",
     question:
       "Do you want your therapist to have knowledge in any of these areas? (optional)",
     multiselect: true,
@@ -107,7 +111,7 @@ const INTAKE_FORM_STEPS: IntakeFormStep[] = [
   },
   {
     category: "therapist preferences",
-    field: "therapistGender",
+    field: "therapist_gender",
     question: "What would you prefer your therapist to identify as?",
     options: {
       Woman: "Woman",
@@ -118,7 +122,7 @@ const INTAKE_FORM_STEPS: IntakeFormStep[] = [
   },
   {
     category: "session preferences",
-    field: "sessionActiveness",
+    field: "session_activeness",
     question: "How active do you want your therapist to be?",
     options: {
       Active: "Active - Your therapist will take the lead and guide you",
@@ -152,11 +156,9 @@ interface IntakeFormProps {
 export function IntakeForm(props: IntakeFormProps) {
   const [stepIdx, setStepIdx] = createSignal(
     props.skipAnswered
-      ? Math.min(
-          INTAKE_FORM_STEPS.findLastIndex(
-            (s) => props.formData[s.field] !== undefined
-          ) + 1,
-          INTAKE_FORM_STEPS.length - 1
+      ? Math.max(
+          INTAKE_FORM_STEPS.findIndex((s) => !props.formData[s.field]),
+          0
         )
       : 0
   );
@@ -176,9 +178,17 @@ export function IntakeForm(props: IntakeFormProps) {
     setStepIdx(Math.max(stepIdx() - 1, 0));
   }
 
-  function autosave(changes: Record<string, undefined | string | string[]>) {
+  async function autosave(
+    id: string | undefined,
+    changes: Record<string, undefined | string | string[]>
+  ) {
     if (!props.autosave) return;
-    console.log("Saving...", changes);
+
+    if (!id) {
+      props.setFormData(await createIntakeForm(changes));
+    } else {
+      await updateIntakeForm(id, changes);
+    }
   }
 
   return (
@@ -213,12 +223,13 @@ export function IntakeForm(props: IntakeFormProps) {
           question={currentStep().question}
           values={(stepValue() ?? []) as string[]}
           options={currentStep().options}
-          onChange={(value) => {
+          onChange={async (value) => {
             props.setFormData({
               ...props.formData,
               [currentStep().field]: value,
             });
-            autosave({ [currentStep().field]: value });
+
+            await autosave(props.formData.id, { [currentStep().field]: value });
           }}
         />
       ) : (
@@ -226,12 +237,12 @@ export function IntakeForm(props: IntakeFormProps) {
           question={currentStep().question}
           value={stepValue() as undefined | string}
           options={currentStep().options}
-          onChange={(value) => {
+          onChange={async (value) => {
             props.setFormData({
               ...props.formData,
               [currentStep().field]: value,
             });
-            autosave({ [currentStep().field]: value });
+            await autosave(props.formData.id, { [currentStep().field]: value });
             next();
           }}
         />
@@ -244,11 +255,12 @@ export function IntakeForm(props: IntakeFormProps) {
       >
         <button
           class="w-full py-3 px-9 bg-fuchsia-700 text-fuchsia-50 rounded shadow hover:bg-fuchsia-800 transition-all cursor-pointer"
-          onClick={() => {
-            autosave({
+          onClick={async () => {
+            await autosave(props.formData.id, {
               [currentStep().field]:
                 stepValue() ?? (currentStep().multiselect ? [] : undefined),
             });
+
             next();
           }}
         >
@@ -268,9 +280,9 @@ export function IntakeForm(props: IntakeFormProps) {
             Want to complete the form later?{" "}
             <span
               class="font-semibold text-fuchsia-700/60 cursor-pointer"
-              onClick={() => {
+              onClick={async () => {
                 props.enableAutosave();
-                autosave(props.formData);
+                await autosave(props.formData.id, props.formData);
               }}
             >
               Enable autosave

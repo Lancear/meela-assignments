@@ -8,7 +8,7 @@ interface IntakeFormIntroProps {
 
 export function IntakeFormIntro(props: IntakeFormIntroProps) {
   return (
-    <div class="h-full w-full flex flex-col justify-center items-center">
+    <div class="min-h-full w-full flex flex-col justify-center items-center">
       <h1 class="mb-8 text-5xl text-center font-serif text-fuchsia-700">
         Match, Choose, Book
       </h1>

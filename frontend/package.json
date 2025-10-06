@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "serve": "vite preview",
-    "build-to-backend": "vite build --base=/static --outDir ../backend/www"
+    "build-to-backend": "vite build --base=/static --outDir ../backend/www --emptyOutDir"
   },
   "license": "MIT",
   "devDependencies": {

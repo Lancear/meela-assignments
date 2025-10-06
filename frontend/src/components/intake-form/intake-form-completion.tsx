@@ -8,7 +8,7 @@ export function IntakeFormCompletion(props: IntakeFormCompletionProps) {
   const [email, setEmail] = createSignal("");
 
   return (
-    <div class="h-full w-full flex flex-col justify-center items-center">
+    <div class="min-h-full w-full flex flex-col justify-center items-center">
       <h1 class="mb-8 text-4xl text-center font-serif text-fuchsia-700">
         That's all questions!
       </h1>
