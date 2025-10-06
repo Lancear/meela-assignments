@@ -35,6 +35,8 @@ cargo run
 
 The app should now be available at [https://localhost:3005](https://localhost:3005).
 
+A walkthrough recording of the app is available [here](./recording.mp4). _(This video is missing one bug fix that got committed afterwards)_
+
 ## Background
 
 At Meela, we help match clients to therapists, but first clients need to complete comprehensive intake forms. These

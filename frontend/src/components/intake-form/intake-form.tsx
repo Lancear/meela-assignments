@@ -154,12 +154,15 @@ interface IntakeFormProps {
 }
 
 export function IntakeForm(props: IntakeFormProps) {
+  const lastAnsweredStep = INTAKE_FORM_STEPS.findIndex(
+    (s) => !props.formData[s.field]
+  );
+
   const [stepIdx, setStepIdx] = createSignal(
     props.skipAnswered
-      ? Math.max(
-          INTAKE_FORM_STEPS.findIndex((s) => !props.formData[s.field]),
-          0
-        )
+      ? lastAnsweredStep >= 0
+        ? lastAnsweredStep
+        : INTAKE_FORM_STEPS.length - 1
       : 0
   );
 

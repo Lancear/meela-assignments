@@ -5,4 +5,4 @@ target
 www
 
 # Database
-data.db
+data.db*
