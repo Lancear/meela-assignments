@@ -1,5 +1,40 @@
 # Take-home task: Client Onboarding Form
 
+## Setup
+
+Build the frontend:
+
+```sh
+# inside /frontend
+pnpm i
+```
+
+```sh
+# inside /frontend
+pnpm build-to-backend
+```
+
+Set up the database:
+
+```sh
+# inside /backend
+sqlx db create
+```
+
+```sh
+# inside /backend
+sqlx migrate run
+```
+
+Build and run the backend:
+
+```sh
+# inside /backend
+cargo run
+```
+
+The app should now be available at [https://localhost:3005](https://localhost:3005).
+
 ## Background
 
 At Meela, we help match clients to therapists, but first clients need to complete comprehensive intake forms. These
@@ -68,7 +103,18 @@ choices than what has been made in the `/backend` directory)
 Remember, focus on the core "resume" functionality - that is what we are evaluating. We look forward to catching up and
 reviewing your submission!
 
-## Thought Process
+## Developer Notes
+
+- I kept the Rust backend pretty simple as learning these unfamiliar libraries with their idioms would otherwise take a big chunk of the 4-6h.
+- As said in the Objective, I did not handle edge cases and validation, in the frontend as well as the backend. Therefore I also didn't add error handling for these cases in the frontend.
+- Choose these questions to contain multiselects, selects, and optional inputs to show that full complexity.
+- Saved multiselect values as csv strings as it is simple and sqlite doesn't have a json/array type.
+- Kept the design rather simple as it is easy to spend a lot of time playing with UI improvements.
+- Chose for a simple SPA that can be refreshed to go back to the sessions screen to keep things simple for this prototype.
+- I liked the progressbar on the original form, but missed some reasoning why there are so many steps so tried to improve that with my progressbar design.
+- Decided to make the autosave opt-in as the background states these questions are sensitive mental health questions and I want to leave the user in control of that data.
+
+## Brainstorming
 
 ### Context
 
